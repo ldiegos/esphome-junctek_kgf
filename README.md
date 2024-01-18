@@ -23,7 +23,7 @@ The applicable config for the device should look something like:
 
 ```yaml
 external_components:
-  - source: github://tfyoung/esphome-junctek_kgf
+  - source: github://ldiegos/esphome-junctek_kgf
 
 uart:
   tx_pin: 26
