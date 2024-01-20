@@ -295,11 +295,16 @@ Explanation:
 - mqtt.sensor.kg140f_01_mqtt_filter: This mqtt sensor, filter and ignore all the other stuff that the KG sents to the MQTT server and only get the "1,119,1653,93,124123,109565,408091,869319,124,0,0,0,8008,29032,\r\n"
 - automation.Battery state - KG140F-01- Publish MQTT cleaned and checked values: The automation check two things, the information when its splitted has 15 positions in the array and also the remainingAh position(4) is below the ampere preset configure in the "input_number.number_ampere_preset". If everything is correct it publish to the MQTT server a new topic with the name of the KG, in my case KG140F-01
   I realise that time to time the remaingAh spikes over the ampere_preset and that give a incorrect meassure.
+  
 - template.trigger: This is in charge of connect to the new topic, tele/KG140F-01/RESULT and split the information into the sensors.
+  
 -sensor.template.sensors.kg140f_01_currentpower: This calculated sensor check the direction of the current and represents the positive or negative ampere consumption. Because the KG only gives absolute numbers and you should check the "CurrentDirection" position.
+
 -sensor.template.sensors.kg140f_01_ampereconsumption: same as previous but with the ampere consumption.
+
 -sensor.template.sensors.kg140f_01_battery_level: The SOC from the battery, because the KG do not give the percentaje only the remain capacity. This calculated take the input_number.number_ampere_preset and the remain Ah and give the percentaje of SOC.
 
 
 Thanks a lot
 Luis.
+
