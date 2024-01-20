@@ -1,6 +1,23 @@
 Hi,
 This is the configuration that I came to with home assistant, is not neat, is not the most clean and efficient way, but, is which works with me.
 
+The KG140F DC 0-120V 100A is connected with a 4 wire hose, the one that is for telephone, with a RJ10 connector attached to the KG in the RS485 port and the other end is crimped with JST and connected to the serial TX, RX and Ground pins from a D1-mini-ESP8266 with tasmota firmware.
+The initial configuration on tasmota to send MQTT comms with:
+```
+Setoption19 0
+Baudrate 115200
+SerialSend 0
+```
+
+In HomeAssistant community forums they wrot about configuring a rule in tasmota like:
+```
+Rule1 on System#Boot do RuleTimer1 10 endon on Rules#Timer=1 do backlog SerialSend :R50=1,2,1,; RuleTimer1 10 endon
+Rule1 1
+```
+But this kind of rule do not works for me, the serial channel is always sending each second the information. So many times something happend and Home assistant received differente values and the meassures are not correctly shown in the dashboards and in the historical data.
+
+So this are my resutls....
+
 After reading the documentation about the KG140F DC 0-120V 100A, The MQTT serial communication channel give me the following each second:
 
 {"SerialReceived":":R50=1,\n:r50=1,119,1653,93,124123,109565,408091,869319,124,0,0,0,8008,29032,\r\n:R51=1,\n:r51=1,147,0,0,0,0,0,100,0,0,1275,100,100,100,0,0,1,\r\n"}
@@ -51,6 +68,8 @@ ohm(30682->306.82->30682/100)           13
 ```
 
 After struggling my head with the sensors, templates and so on, i finished with the following package(yaml file): pck_enrgyconsum_battery_control.yaml
+At this package i'm able to control the update information from MQTT and try to overide the problems with odd information and values not in range.
+
 
 ```
 ###################################################################################
@@ -256,36 +275,29 @@ sensor:
         unit_of_measurement: '%'
         friendly_name: KG140F-01 Battery Level
 
-      daly150a_powerwall_currentpower:
-        value_template: >
-          {{ '%0.1f' | format
-                        (
-                          states('sensor.02_dalybmss_esp32_battery_voltage') | float * 
-                          states('sensor.02_dalybmss_esp32_battery_current') | float
-                        )
-          }}
-        unit_of_measurement: 'W'
-        friendly_name: Daly150a-Powerwall-CurrentPower
-
-```
-
-
-The only thing that is not working for me, is the tasmota rule, despite whatever i put in the rule, the transmission to the HA is every second... I bought some D1 mini, just for check if the problem is the ESP32 or not.
-
-```
-Rule1 on System#Boot do RuleTimer1 10 endon on Rules#Timer=1 do backlog SerialSend :R50=1,2,1,; RuleTimer1 10 endon
-
-Rule1 1
 ```
 
 
 So the dashboard is:
+
 When the shunt detect the negative current:
-![image|690x166](upload://dM73EeXEu9Ss5MgNioPPWZxA0zu.png)
+![image](https://github.com/ldiegos/esphome-junctek_kgf/assets/29803600/bcdc8f09-a21b-48bc-9dbd-35b2331814c6)
+
 
 When the shunt detect the positive current(charging):
-![image|690x180](upload://QfwWV7bBl9qrOmW6758Ui9sML9.png)
+![image](https://github.com/ldiegos/esphome-junctek_kgf/assets/29803600/01580810-45d6-47f5-9178-a2c59879604c)
 
 
-Thanks a lot to all of you for your knowledge
+Explanation:
+- input_number.number_ampere_preset: This number represent the current capacity of the battery monitored with the KG, this is not received by the KG so i created a variable as input_number, in my situation, the 127.5 Ah is de total of the battery.
+- mqtt.sensor.kg140f_01_mqtt_filter: This mqtt sensor, filter and ignore all the other stuff that the KG sents to the MQTT server and only get the "1,119,1653,93,124123,109565,408091,869319,124,0,0,0,8008,29032,\r\n"
+- automation.Battery state - KG140F-01- Publish MQTT cleaned and checked values: The automation check two things, the information when its splitted has 15 positions in the array and also the remainingAh position(4) is below the ampere preset configure in the "input_number.number_ampere_preset". If everything is correct it publish to the MQTT server a new topic with the name of the KG, in my case KG140F-01
+  I realise that time to time the remaingAh spikes over the ampere_preset and that give a incorrect meassure.
+- template.trigger: This is in charge of connect to the new topic, tele/KG140F-01/RESULT and split the information into the sensors.
+-sensor.template.sensors.kg140f_01_currentpower: This calculated sensor check the direction of the current and represents the positive or negative ampere consumption. Because the KG only gives absolute numbers and you should check the "CurrentDirection" position.
+-sensor.template.sensors.kg140f_01_ampereconsumption: same as previous but with the ampere consumption.
+-sensor.template.sensors.kg140f_01_battery_level: The SOC from the battery, because the KG do not give the percentaje only the remain capacity. This calculated take the input_number.number_ampere_preset and the remain Ah and give the percentaje of SOC.
+
+
+Thanks a lot
 Luis.
