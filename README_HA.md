@@ -278,13 +278,15 @@ sensor:
 ```
 
 
-So the dashboard is:
+So the dashboard shows,
 
 When the shunt detect the negative current:
+
 ![image](https://github.com/ldiegos/esphome-junctek_kgf/assets/29803600/bcdc8f09-a21b-48bc-9dbd-35b2331814c6)
 
 
 When the shunt detect the positive current(charging):
+
 ![image](https://github.com/ldiegos/esphome-junctek_kgf/assets/29803600/01580810-45d6-47f5-9178-a2c59879604c)
 
 
