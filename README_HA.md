@@ -19,8 +19,9 @@ But this kind of rule do not works for me, the serial channel is always sending 
 So this are my resutls....
 
 After reading the documentation about the KG140F DC 0-120V 100A, The MQTT serial communication channel give me the following each second:
-
+```
 {"SerialReceived":":R50=1,\n:r50=1,119,1653,93,124123,109565,408091,869319,124,0,0,0,8008,29032,\r\n:R51=1,\n:r51=1,147,0,0,0,0,0,100,0,0,1275,100,100,100,0,0,1,\r\n"}
+```
 
 The information that is needed for the KG140F to works on Home Assistant is from the ":r50=" to the ":R51" so is this:
 
@@ -298,11 +299,11 @@ Explanation:
   
 - template.trigger: This is in charge of connect to the new topic, tele/KG140F-01/RESULT and split the information into the sensors.
   
--sensor.template.sensors.kg140f_01_currentpower: This calculated sensor check the direction of the current and represents the positive or negative ampere consumption. Because the KG only gives absolute numbers and you should check the "CurrentDirection" position.
+- sensor.template.sensors.kg140f_01_currentpower: This calculated sensor check the direction of the current and represents the positive or negative ampere consumption. Because the KG only gives absolute numbers and you should check the "CurrentDirection" position.
 
--sensor.template.sensors.kg140f_01_ampereconsumption: same as previous but with the ampere consumption.
+- sensor.template.sensors.kg140f_01_ampereconsumption: same as previous but with the ampere consumption.
 
--sensor.template.sensors.kg140f_01_battery_level: The SOC from the battery, because the KG do not give the percentaje only the remain capacity. This calculated take the input_number.number_ampere_preset and the remain Ah and give the percentaje of SOC.
+- sensor.template.sensors.kg140f_01_battery_level: The SOC from the battery, because the KG do not give the percentaje only the remain capacity. This calculated take the input_number.number_ampere_preset and the remain Ah and give the percentaje of SOC.
 
 
 Thanks a lot
